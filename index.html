@@ -29,11 +29,15 @@
             <div class="container">
                 <div class="row">
                     <div class="logo span4">
-                        <h1><a href="">Nebulas Dice <span class="red">.</span></a></h1>
+                    	<a href="index.html">
+                    	<img src="assets/img/dicelogo.png"></a>
+                    	<a href="index.html">
+                    	<img src="assets/img/wordlogo.png"></a>
+                        <!--<h1><a href="">Nebulas Dice <span class="red">.</span></a></h1>-->
                     </div>
                     <div class="links span8">
-                        <a class="home" href="https://github.com/ChengOrangeJu/WebExtensionWallet" rel="tooltip" data-placement="bottom" data-original-title="Attention: Please install WebExtensionWallet first"></a>
-                        <a class="blog" rel="tooltip" data-placement="bottom" data-original-title="About Nebulas Dice: Our Nebulas dice game is provably-fair, has a low 1% house edge and no sign-ups or deposits."></a>
+                        <a class="home" href="about.html" rel="tooltip" data-placement="bottom" data-original-title="How to play and about us"><span class="red"><strong>Help</strong></span></a>
+                        <a class="blog" href="https://nebulas.io/index.html" rel="tooltip" data-placement="bottom" data-original-title="Powered by Nebulas"><span class="red"><strong>Nebulas</strong></span></a>
                     </div>
                 </div>
             </div>
@@ -111,13 +115,7 @@
         	    var callArgs = document.getElementById("callArgs").value;
         	    callArgs = '['+callArgs+']';
         	    serialNumber = nebPay.call(to, value, callFunction, callArgs, {
-        	        qrcode: {
-        	            showQRCode: true
-        	        },
-        	        goods: {
-        	            name: "test",
-        	            desc: "test goods"
-        	        },
+
         	        callback:callbackUrl,
         	        listener: listener  //set listener for extension transaction result
         	    });
@@ -136,16 +134,15 @@
         	    });
         	}
         	function listener(resp) {
-        	    console.log("resp: " + JSON.stringify(resp))
-        	    document.getElementById("resultFromExtension").value = JSON.stringify(resp)
+        	    console.log("resp: " + JSON.stringify(resp));
         	}
         	function selectMainnet () {
         	    callbackUrl = NebPay.config.mainnetUrl;
-        	    console.log("Mainnet selected: " + callbackUrl)
+        	    console.log("Mainnet selected: " + callbackUrl);
         	}
         	function selectTestnet () {
         	    callbackUrl = NebPay.config.testnetUrl;
-        	    console.log("Testnet selected: " + callbackUrl)
+        	    console.log("Testnet selected: " + callbackUrl);
         	}
     	</script>
 

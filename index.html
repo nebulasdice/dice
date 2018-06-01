@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <title>Nebulas Dice</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <!-- CSS -->
+        <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=PT+Sans:400,700'>
+        <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Oleo+Script:400,700'>
+        <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/style.css">
+
+        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+    </head>
+
+    <body>
+
+        <div class="header">
+            <div class="container">
+                <div class="row">
+                    <div class="logo span4">
+                        <h1><a href="">Nebulas Dice <span class="red">.</span></a></h1>
+                    </div>
+                    <div class="links span8">
+                        <a class="home" href="https://github.com/ChengOrangeJu/WebExtensionWallet" rel="tooltip" data-placement="bottom" data-original-title="Attention: Please install WebExtensionWallet first"></a>
+                        <a class="blog" rel="tooltip" data-placement="bottom" data-original-title="About Nebulas Dice: Our Nebulas dice game is provably-fair, has a low 1% house edge and no sign-ups or deposits."></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="register-container container">
+            <div class="row">
+                <div class="iphone span5">
+                    <!-- <img src="assets/img/iphone.png" alt=""> -->
+                </div>
+                <div class="register span6">
+                    <form action="" method="post">
+                        <h2>Bet Your <span class="red"><strong>Life</strong></span></h2>
+                        <label for="betAmount">Bet amount</label>
+                        <input type="text" id="callValue" name="callValue" onkeyup="calculate()" placeholder="enter the NAS amount you want to bet">
+                        <label for="rollUnder">Roll under</label>
+                        <input type="text" id="callArgs" name="callArgs"  onkeyup="calculate()" placeholder="enter an integer range from 2-99">
+                        <label for="chanceOfWinning">Chance of winning</label>
+                        <textarea id="chanceOfWinning" rows="1" readonly="readonly"></textarea>
+                        <label for="returnOnWin">Return on win</label>
+                        <textarea id="returnOnWin" rows="1" readonly="readonly"></textarea>
+                        <button type="button" onclick="onCallClick()">ROLL</button>
+                        <label for="houseBalance">Check house balance (maximum winning is house balance)</label>
+                        <textarea id="houseBalance" rows="1" readonly="readonly"></textarea>
+                        <button type="button" onclick="checkBalance()">Check House Balance</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Javascript -->
+        <script src="assets/js/jquery-1.8.2.min.js"></script>
+        <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+        <script src="assets/js/jquery.backstretch.min.js"></script>
+        <script src="assets/js/scripts.js"></script>
+        <script type="text/javascript" src="assets/js/nebPay.js"></script>
+        <script type="text/javascript">
+        	var NebPay = require("nebpay");
+        	var nebPay = new NebPay();
+        	var serialNumber;
+        	var callbackUrl = NebPay.config.mainnetUrl;
+        	//var callbackUrl = NebPay.config.testnetUrl;
+
+            function calculate(){
+                var amount = document.getElementById("callValue").value;
+                var betNum = document.getElementById("callArgs").value;
+                if(betNum>=2 && betNum<=99)
+                    document.getElementById("chanceOfWinning").value = betNum-1 + '%';
+                else
+                    document.getElementById("chanceOfWinning").value = '';
+                if(amount >0 && (betNum>=2 && betNum<=99))
+                    document.getElementById("returnOnWin").value = amount * 100/(betNum-1)*0.99 + ' NAS';
+                else
+                    document.getElementById("returnOnWin").value ='';                   
+            }
+
+            function checkBalance(){
+                document.getElementById("houseBalance").value = '';
+                //var url="https://testnet.nebulas.io/claim/api/state/n1znmGyj17WKq8rtn4Kg4Q4BnBBrmNEja69/";
+                var url="https://explorer.nebulas.io/main/api/address/n1ggZi38TxBcv8Y45GJJ8kxMgaBNrv41YVB";
+                $.get(url,function(resp){console.log(resp);
+                    if(resp.msg == 'success'){
+                        document.getElementById("houseBalance").value = resp.data.address.currentBalance/10e17 + ' NAS';
+                    }
+                    else{
+                        document.getElementById("houseBalance").value = "Network error";
+                    }
+                }) 
+            }
+        	
+        	function onCallClick() {  
+        		var to = "n1ggZi38TxBcv8Y45GJJ8kxMgaBNrv41YVB";
+        		var callFunction = "gamble";  
+        	    var value = document.getElementById("callValue").value;
+        	    var callArgs = document.getElementById("callArgs").value;
+        	    callArgs = '['+callArgs+']';
+        	    serialNumber = nebPay.call(to, value, callFunction, callArgs, {
+        	        qrcode: {
+        	            showQRCode: true
+        	        },
+        	        goods: {
+        	            name: "test",
+        	            desc: "test goods"
+        	        },
+        	        callback:callbackUrl,
+        	        listener: listener  //set listener for extension transaction result
+        	    });
+        	    setTimeout(() => {
+        	        onrefreshClick();
+        	    }, 1000);
+        	}
+     	
+        	function onrefreshClick() {
+        	    nebPay.queryPayInfo(serialNumber,{callback: callbackUrl})   //search transaction result from server (result upload to server by app)
+        	    .then(function (resp) {
+        	        document.getElementById('result').value = resp;
+        	    })
+        	    .catch(function (err) {
+        	        console.log(err);
+        	    });
+        	}
+        	function listener(resp) {
+        	    console.log("resp: " + JSON.stringify(resp))
+        	    document.getElementById("resultFromExtension").value = JSON.stringify(resp)
+        	}
+        	function selectMainnet () {
+        	    callbackUrl = NebPay.config.mainnetUrl;
+        	    console.log("Mainnet selected: " + callbackUrl)
+        	}
+        	function selectTestnet () {
+        	    callbackUrl = NebPay.config.testnetUrl;
+        	    console.log("Testnet selected: " + callbackUrl)
+        	}
+    	</script>
+
+    </body>
+
+</html>
+
